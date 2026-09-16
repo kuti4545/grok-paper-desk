@@ -5,30 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Grok sanal masa</title>
   <style>
-    :root { --bg:#070b14; --card:#10182a; --line:#22304a; --txt:#e8eefc; --mut:#8b97b3; --long:#34d399; --short:#fb7185; --gold:#fbbf24; }
+    :root { --bg:#070b14; --card:#10182a; --line:#22304a; --txt:#e8eefc; --mut:#8b97b3; --long:#34d399; --short:#fb7185; }
     * { box-sizing:border-box; }
-    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:radial-gradient(1200px 500px at 10% -10%,#152044,var(--bg)); color:var(--txt); }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:#070b14; color:var(--txt); }
     header { padding:22px 18px 8px; max-width:1100px; margin:auto; }
     h1 { margin:0 0 4px; font-size:22px; }
-    .sub { color:var(--mut); font-size:13px; }
+    .sub,.muted { color:var(--mut); font-size:13px; }
     .stats { max-width:1100px; margin:12px auto; padding:0 14px; display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; }
-    .stat { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px 14px; }
-    .stat b { display:block; font-size:22px; margin-top:4px; }
+    .stat,.card,.thought { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px 14px; }
+    .stat b { display:block; font-size:20px; margin-top:4px; }
     .pos { color:var(--long); } .neg { color:var(--short); }
     .wrap { max-width:1100px; margin:auto; padding:8px 14px 40px; }
-    h2 { font-size:15px; color:var(--mut); font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
-    .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; margin:0 0 10px; }
-    .row { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+    h2 { font-size:14px; color:var(--mut); text-transform:uppercase; }
+    .row { display:flex; justify-content:space-between; gap:10px; }
     .sym { font-weight:800; font-size:18px; }
     .badge { font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px; }
     .LONG { background:#063226; color:var(--long); }
     .SHORT { background:#3a1020; color:var(--short); }
     .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin-top:10px; font-size:13px; color:var(--mut); }
-    .grid strong { display:block; color:var(--txt); font-size:14px; margin-top:2px; }
+    .grid strong { display:block; color:var(--txt); margin-top:2px; }
     table { width:100%; border-collapse:collapse; font-size:13px; }
     th,td { padding:8px 6px; border-bottom:1px solid var(--line); text-align:left; }
-    th { color:var(--mut); font-weight:600; }
-    .muted { color:var(--mut); font-size:13px; }
+    .thought { max-width:1100px; margin:12px auto; }
   </style>
 </head>
 <body>
@@ -36,44 +34,37 @@
     <h1>Grok sanal masa</h1>
     <div class="sub" id="meta">Yükleniyor…</div>
   </header>
-  <div class="card" style="max-width:1100px;margin:12px auto;padding:14px 16px" id="thought"></div>
+  <div class="thought" id="thought"></div>
   <section class="stats" id="stats"></section>
   <div class="wrap">
     <h2>Açık işlemler</h2>
     <div id="open"></div>
     <h2>Kapananlar</h2>
-    <div class="card" style="overflow-x:auto"><table id="closed"><thead>
-      <tr><th>Zaman</th><th>Coin</th><th>Yön</th><th>Giriş</th><th>Çıkış</th><th>Sonuç</th><th>PnL</th></tr>
-    </thead><tbody></tbody></table></div>
-    <h2>Tarayıcı adayları</h2>
-    <div class="card" style="overflow-x:auto"><table id="cands"><thead>
-      <tr><th>Coin</th><th>Yön</th><th>Puan</th><th>Fiyat</th><th>Setup</th></tr>
-    </thead><tbody></tbody></table></div>
+    <div class="card" style="overflow-x:auto"><table id="closed"><thead><tr><th>Zaman</th><th>Coin</th><th>Yön</th><th>Giriş</th><th>Çıkış</th><th>Sonuç</th><th>PnL</th></tr></thead><tbody></tbody></table></div>
+    <h2>Adaylar</h2>
+    <div class="card" style="overflow-x:auto"><table id="cands"><thead><tr><th>Coin</th><th>Yön</th><th>Puan</th><th>Fiyat</th><th>Setup</th></tr></thead><tbody></tbody></table></div>
   </div>
 <script>
-const fmt = (n, d=2) => Number(n).toLocaleString("tr-TR", {minimumFractionDigits:d, maximumFractionDigits:d});
-const cls = (n) => n >= 0 ? "pos" : "neg";
+const BOOK = "https://raw.githubusercontent.com/kuti4545/grok-paper-desk/main/docs/book.json";
+const fmt = (n,d=2) => Number(n).toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const cls = n => n>=0?"pos":"neg";
 async function load(){
-  const data = await fetch("book.json?ts="+Date.now()).then(r=>r.json());
-  const s = data.stats || {};
-  document.getElementById("meta").textContent =
-    `${s.updated_at || ""} · tarama ${data.scan_at || "-"} · ${data.scanned || 0} parite · ${s.mode || "sanal"}`;
-  document.getElementById("thought").innerHTML =
-    `<div class="muted">Grok son fikir · ${data.last_thought_at||"-"}</div><div>${data.last_thought||"Bekleniyor"}</div>`;
+  const data = await fetch(BOOK+"?ts="+Date.now()).then(r=>r.json());
+  const s = data.stats||{};
+  document.getElementById("meta").textContent = `${s.updated_at||""} · tarama ${data.scan_at||"-"} · ${data.scanned||0} parite`;
+  document.getElementById("thought").innerHTML = `<div class="muted">Grok · ${data.last_thought_at||"-"}</div><div>${data.last_thought||"Bekleniyor"}</div>`;
   document.getElementById("stats").innerHTML = [
-    ["Sanal bakiye", fmt(s.equity||0)+" USDT", cls(s.pnl||0)],
-    ["Toplam PnL", (s.pnl>=0?"+":"")+fmt(s.pnl||0), cls(s.pnl||0)],
-    ["Açık / kapanan", (s.open_count||0)+" / "+(s.closed_count||0), ""],
-    ["Kazanma", (s.win_rate||0)+"%", ""],
-  ].map(([k,v,c]) => `<div class="stat">${k}<b class="${c}">${v}</b></div>`).join("");
-  const open = data.open || [];
-  document.getElementById("open").innerHTML = open.length ? open.map(p => `
-    <article class="card">
+    ["Bakiye", fmt(s.equity||0)+" USDT", cls(s.pnl||0)],
+    ["PnL", (s.pnl>=0?"+":"")+fmt(s.pnl||0), cls(s.pnl||0)],
+    ["Açık", String(s.open_count||0), ""],
+    ["Kazanma", (s.win_rate||0)+"%", ""]
+  ].map(([k,v,c])=>`<div class="stat">${k}<b class="${c}">${v}</b></div>`).join("");
+  const open = data.open||[];
+  document.getElementById("open").innerHTML = open.length ? open.map(p=>`
+    <article class="card" style="margin-bottom:10px">
       <div class="row">
         <div><div class="sym">${p.symbol}</div><span class="badge ${p.side}">${p.side} ${p.leverage}x</span></div>
-        <div style="text-align:right">
-          <div class="${cls(p.pnl)}" style="font-size:22px;font-weight:800">${p.pnl>=0?"+":""}${fmt(p.pnl)} USDT</div>
-        </div>
+        <div class="${cls(p.pnl)}" style="font-size:22px;font-weight:800">${p.pnl>=0?"+":""}${fmt(p.pnl)}</div>
       </div>
       <div class="grid">
         <div>Giriş<strong>${p.entry}</strong></div>
@@ -83,17 +74,12 @@ async function load(){
       </div>
       <p class="muted">${p.thesis||""}</p>
     </article>`).join("") : '<p class="muted">Açık sanal işlem yok.</p>';
-  document.querySelector("#closed tbody").innerHTML =
-    (data.closed||[]).slice().reverse().slice(0,40).map(p => `<tr>
-      <td>${(p.closed_at||"").replace("T"," ").slice(0,16)}</td>
-      <td>${p.symbol}</td><td>${p.side}</td><td>${p.entry}</td><td>${p.exit}</td>
-      <td>${p.result||""}</td><td class="${cls(p.pnl)}">${p.pnl>=0?"+":""}${fmt(p.pnl)}</td></tr>`).join("")
-    || `<tr><td colspan="7" class="muted">Henüz kapanan yok.</td></tr>`;
-  document.querySelector("#cands tbody").innerHTML =
-    (data.candidates||[]).map(c => `<tr><td>${c.symbol||""}</td><td>${c.side||""}</td><td>${c.score||""}</td><td>${c.price||""}</td><td class="muted">${c.setup||""}</td></tr>`).join("")
-    || `<tr><td colspan="5" class="muted">6+ aday yok.</td></tr>`;
+  document.querySelector("#closed tbody").innerHTML = (data.closed||[]).slice().reverse().slice(0,40).map(p=>`<tr>
+    <td>${(p.closed_at||"").replace("T"," ").slice(0,16)}</td>
+    <td>${p.symbol}</td><td>${p.side}</td><td>${p.entry}</td><td>${p.exit}</td>
+    <td>${p.result||""}</td><td class="${cls(p.pnl)}">${p.pnl>=0?"+":""}${fmt(p.pnl)}</td></tr>`).join("") || `<tr><td colspan="7" class="muted">Yok</td></tr>`;
+  document.querySelector("#cands tbody").innerHTML = (data.candidates||[]).map(c=>`<tr><td>${c.symbol}</td><td>${c.side}</td><td>${c.score}</td><td>${c.price}</td><td class="muted">${c.setup||""}</td></tr>`).join("") || `<tr><td colspan="5" class="muted">Aday yok</td></tr>`;
 }
 load(); setInterval(load, 20000);
 </script>
-</body>
-</html>
+</body></html>
