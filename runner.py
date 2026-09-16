@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tarama 5 dk. Acik islem fiyati 25 sn."""
+"""10 dk tarama + 25 sn fiyat. Grok boyut secer."""
 
 from __future__ import annotations
 
@@ -20,15 +20,15 @@ SESSION = requests.Session()
 SESSION.headers.update({"User-Agent": "grok-paper-desk/1.0"})
 
 
-def now() -> datetime:
+def now():
     return datetime.now(TR)
 
 
-def iso() -> str:
+def iso():
     return now().isoformat(timespec="seconds")
 
 
-def load_json(path: str, default):
+def load_json(path, default):
     p = Path(path)
     if not p.exists():
         return default
@@ -38,13 +38,13 @@ def load_json(path: str, default):
         return default
 
 
-def save_json(path: str, data) -> None:
+def save_json(path, data):
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def load_book() -> dict:
+def load_book():
     book = load_json(config.BOOK_PATH, {})
     book.setdefault("start_equity", config.START_EQUITY)
     book.setdefault("open", [])
@@ -54,7 +54,7 @@ def load_book() -> dict:
     return book
 
 
-def send_telegram(text: str) -> None:
+def send_telegram(text):
     token, chat = config.TELEGRAM_BOT_TOKEN, config.TELEGRAM_CHAT_ID
     if not token or not chat:
         print("telegram yok:\n", text)
@@ -69,7 +69,7 @@ def send_telegram(text: str) -> None:
         print("telegram", exc)
 
 
-def fetch_tickers() -> dict:
+def fetch_tickers():
     r = SESSION.get(
         f"{config.BITGET_BASE}/api/v2/mix/market/tickers",
         params={"productType": config.PRODUCT_TYPE},
@@ -82,11 +82,18 @@ def fetch_tickers() -> dict:
     return {row["symbol"]: row for row in (body.get("data") or []) if row.get("symbol")}
 
 
-def last_px(row: dict) -> float:
+def last_px(row):
     return float(row.get("lastPr") or 0)
 
 
-def fetch_scanner() -> dict:
+def chg24(row):
+    try:
+        return float(row.get("change24h") or 0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def fetch_scanner():
     url = config.SCANNER_JSON
     if url.startswith("http"):
         req = Request(url, headers={"User-Agent": "grok-paper-desk/1.0"})
@@ -96,7 +103,25 @@ def fetch_scanner() -> dict:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
 
-def pnl_usdt(side: str, entry: float, mark: float, notional: float) -> float:
+def movers(tickers):
+    rows = []
+    for sym, row in tickers.items():
+        if not sym.endswith("USDT") or sym in config.SKIP_SYMBOLS:
+            continue
+        px = last_px(row)
+        if px <= 0:
+            continue
+        rows.append({
+            "symbol": sym,
+            "price": px,
+            "change24h": round(chg24(row), 2),
+        })
+    up = sorted(rows, key=lambda x: x["change24h"], reverse=True)[:7]
+    down = sorted(rows, key=lambda x: x["change24h"])[:7]
+    return up, down
+
+
+def pnl_usdt(side, entry, mark, notional):
     if not entry:
         return 0.0
     move = (mark - entry) / entry
@@ -105,7 +130,14 @@ def pnl_usdt(side: str, entry: float, mark: float, notional: float) -> float:
     return notional * move
 
 
-def close_pos(book: dict, pos: dict, mark: float, reason: str) -> None:
+def free_margin(book):
+    start = float(book.get("start_equity") or config.START_EQUITY)
+    realized = sum(float(p.get("pnl") or 0) for p in book.get("closed") or [])
+    used = sum(float(p.get("margin") or 0) for p in book.get("open") or [])
+    return max(0.0, start + realized - used)
+
+
+def close_pos(book, pos, mark, reason):
     pos["exit"] = mark
     pos["closed_at"] = iso()
     pos["result"] = reason
@@ -118,7 +150,7 @@ def close_pos(book: dict, pos: dict, mark: float, reason: str) -> None:
     )
 
 
-def mark_and_stops(book: dict, tickers: dict) -> list:
+def mark_and_stops(book, tickers):
     notes = []
     for pos in list(book.get("open") or []):
         row = tickers.get(pos["symbol"])
@@ -146,7 +178,7 @@ def mark_and_stops(book: dict, tickers: dict) -> list:
     return notes
 
 
-def apply_decision(book: dict, tickers: dict) -> list:
+def apply_decision(book, tickers):
     decision = load_json(config.DECISION_PATH, {})
     did = str(decision.get("id") or "")
     if not did or did == book.get("processed_decision"):
@@ -173,7 +205,7 @@ def apply_decision(book: dict, tickers: dict) -> list:
             notes.append(f"{symbol} zaten acik")
             continue
         if len(book.get("open") or []) >= config.MAX_OPEN:
-            notes.append("max acik")
+            notes.append("masa dolu")
             break
         row = tickers.get(symbol)
         if not row:
@@ -183,12 +215,21 @@ def apply_decision(book: dict, tickers: dict) -> list:
         tp = float(item.get("tp") or 0)
         if side == "LONG":
             sl = sl or entry * 0.988
-            tp = tp or entry * 1.02
+            tp = tp or entry * 1.024
         else:
             sl = sl or entry * 1.012
-            tp = tp or entry * 0.98
-        lev = max(1, min(config.MAX_LEVERAGE, int(item.get("leverage") or 2)))
-        margin = config.MARGIN_PER_TRADE
+            tp = tp or entry * 0.976
+        lev = int(item.get("leverage") or 2)
+        lev = max(1, min(config.ABSURD_LEVERAGE, lev))
+        free = free_margin(book)
+        margin = float(item.get("margin") or 0)
+        if margin <= 0:
+            risk = float(item.get("risk_pct") or 12)
+            margin = free * max(1.0, min(40.0, risk)) / 100.0
+        margin = round(min(margin, free), 2)
+        if margin < 5:
+            notes.append(f"{symbol} yetersiz marj")
+            continue
         pos = {
             "id": uuid.uuid4().hex[:10],
             "symbol": symbol,
@@ -199,7 +240,7 @@ def apply_decision(book: dict, tickers: dict) -> list:
             "tp": tp,
             "leverage": lev,
             "margin": margin,
-            "notional": margin * lev,
+            "notional": round(margin * lev, 2),
             "pnl": 0.0,
             "pnl_pct": 0.0,
             "score": item.get("score"),
@@ -211,14 +252,16 @@ def apply_decision(book: dict, tickers: dict) -> list:
         }
         book["open"].append(pos)
         send_telegram(
-            f"Grok giriyor\n{side} {symbol}  {lev}x\nGiris {entry}\nSL {sl}\nTP {tp}\n{pos['thesis'][:280]}"
+            f"Grok giriyor\n{side} {symbol}  {lev}x\n"
+            f"Marj {margin}  notional {pos['notional']}\n"
+            f"Giris {entry}\nSL {sl}\nTP {tp}\n{pos['thesis'][:240]}"
         )
-        notes.append(f"Grok giris {side} {symbol} {entry}")
+        notes.append(f"Grok giris {side} {symbol} {entry} {lev}x {margin}u")
     book["processed_decision"] = did
     return notes
 
 
-def candidates(scan: dict) -> list:
+def candidates(scan):
     out = []
     for s in scan.get("top") or []:
         if float(s.get("score") or 0) < config.CANDIDATE_SCORE:
@@ -233,15 +276,13 @@ def candidates(scan: dict) -> list:
             "sl": s.get("sl"),
             "tp": s.get("tp1"),
             "setup": s.get("setup"),
-            "style": s.get("style"),
             "rsi": s.get("rsi"),
-            "confidence": s.get("confidence"),
             "yorum": s.get("yorum"),
         })
     return out[:7]
 
 
-def summarize(book: dict) -> dict:
+def summarize(book):
     closed = book.get("closed") or []
     wins = [p for p in closed if float(p.get("pnl") or 0) > 0]
     realized = sum(float(p.get("pnl") or 0) for p in closed)
@@ -262,16 +303,19 @@ def summarize(book: dict) -> dict:
         "losses": len(closed) - len(wins),
         "win_rate": round(len(wins) / len(closed) * 100, 1) if closed else 0,
         "indicators": config.INDICATORS,
-        "mode": "SANAL * giris/cikis Grok",
+        "mode": "SANAL trader · Grok boyut secer",
     }
 
 
-def tick(full_scan: bool = True) -> dict:
+def tick(full_scan=True):
     book = load_book()
     tickers = fetch_tickers()
     notes = []
     notes += apply_decision(book, tickers)
     notes += mark_and_stops(book, tickers)
+    up, down = movers(tickers)
+    book["gainers"] = up
+    book["losers"] = down
     if full_scan:
         scan = {}
         try:
@@ -292,17 +336,17 @@ def tick(full_scan: bool = True) -> dict:
     return book
 
 
-def main() -> None:
+def main():
     watch = 0
     if len(sys.argv) >= 3 and sys.argv[1] == "--watch":
         watch = int(sys.argv[2])
-    tick(full_scan=True)
+    tick(True)
     if watch <= 0:
         return
     deadline = time.time() + watch
     while time.time() < deadline:
         time.sleep(25)
-        tick(full_scan=False)
+        tick(False)
 
 
 if __name__ == "__main__":
