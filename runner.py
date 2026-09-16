@@ -14,10 +14,12 @@ from urllib.request import Request, urlopen
 import requests
 
 import config
+import tape
 
 TR = timezone(timedelta(hours=3))
 SESSION = requests.Session()
-SESSION.headers.update({"User-Agent": "grok-paper-desk/1.0"})
+SESSION.headers.update({"User-Agent": "grok-paper-desk/1.2"})
+tape.attach_session(SESSION)
 
 
 def now():
@@ -87,35 +89,14 @@ def last_px(row):
     return float(row.get("lastPr") or 0)
 
 
-def chg24(row):
-    try:
-        return float(row.get("change24h") or 0)
-    except (TypeError, ValueError):
-        return 0.0
-
-
 def fetch_scanner():
     url = config.SCANNER_JSON
     if url.startswith("http"):
-        req = Request(url, headers={"User-Agent": "grok-paper-desk/1.0"})
+        req = Request(url, headers={"User-Agent": "grok-paper-desk/1.2"})
         with urlopen(req, timeout=20) as resp:
             return json.loads(resp.read().decode())
     path = Path(url)
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
-
-
-def movers(tickers):
-    rows = []
-    for sym, row in tickers.items():
-        if not sym.endswith("USDT") or sym in config.SKIP_SYMBOLS:
-            continue
-        px = last_px(row)
-        if px <= 0:
-            continue
-        rows.append({"symbol": sym, "price": px, "change24h": round(chg24(row), 2)})
-    up = sorted(rows, key=lambda x: x["change24h"], reverse=True)[:7]
-    down = sorted(rows, key=lambda x: x["change24h"])[:7]
-    return up, down
 
 
 def pump_watch(gainers):
@@ -126,7 +107,7 @@ def pump_watch(gainers):
                 "symbol": g["symbol"],
                 "bias": "SHORT",
                 "why": f"24s +{g['change24h']}% pompa",
-                "trigger": "ilk 15m dagitim / RSI gevsemesi",
+                "trigger": "ilk 15m dagitim / RSI gevsemesi / ask duvari",
                 "price": g["price"],
             })
     return out
@@ -333,7 +314,7 @@ def summarize(book):
         "losses": len(closed) - len(wins),
         "win_rate": round(len(wins) / len(closed) * 100, 1) if closed else 0,
         "indicators": config.INDICATORS,
-        "mode": "SANAL trader",
+        "mode": "SANAL trader · funding+derinlik",
     }
 
 
@@ -343,7 +324,7 @@ def tick(full_scan=True):
     notes = []
     notes += apply_decision(book, tickers)
     notes += mark_and_stops(book, tickers)
-    up, down = movers(tickers)
+    up, down = tape.movers(tickers, config.SKIP_SYMBOLS)
     book["gainers"] = up
     book["losers"] = down
     book["watch"] = merge_watch(book.get("watch_manual"), pump_watch(up))
@@ -356,6 +337,10 @@ def tick(full_scan=True):
         book["candidates"] = candidates(scan)
         book["scan_at"] = scan.get("updated_at")
         book["scanned"] = scan.get("scanned")
+        try:
+            tape.enrich(book, tickers)
+        except Exception as exc:
+            notes.append(f"tape: {exc}")
     book["stats"] = summarize(book)
     if notes:
         book["log"].append({"ts": iso(), "events": notes})
