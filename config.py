@@ -1,4 +1,4 @@
-"""Sanal masa. Emir yok. Giriş/çıkış kararı Grok'tan gelir."""
+"""Sanal masa. Boyut ve kaldirac Grok kararinda."""
 
 import os
 
@@ -6,9 +6,9 @@ BITGET_BASE = "https://api.bitget.com"
 PRODUCT_TYPE = "USDT-FUTURES"
 
 START_EQUITY = float(os.getenv("START_EQUITY", "300"))
-MAX_LEVERAGE = int(os.getenv("MAX_LEVERAGE", "3"))
-MARGIN_PER_TRADE = float(os.getenv("MARGIN_PER_TRADE", "25"))
-MAX_OPEN = int(os.getenv("MAX_OPEN", "8"))
+# Sadece yazim hatasi durdurucu. Grok 1-50 secebilir.
+ABSURD_LEVERAGE = int(os.getenv("ABSURD_LEVERAGE", "50"))
+MAX_OPEN = int(os.getenv("MAX_OPEN", "6"))
 CANDIDATE_SCORE = float(os.getenv("CANDIDATE_SCORE", "5.0"))
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
@@ -27,7 +27,7 @@ SKIP_SYMBOLS = {
     "MSFTUSDT", "AMZNUSDT", "METAUSDT", "GOOGUSDT", "MSTRUSDT",
     "COINUSDT", "SOXLUSDT", "SOXSUSDT", "TQQQUSDT", "SPXUSDT",
     "JP225USDT", "NAS100USDT", "US30USDT", "PAXGUSDT", "XAUUSDT",
-    "XAUTUSDT", "XAGUSDT", "HOODUSDT",
+    "XAUTUSDT", "XAGUSDT", "HOODUSDT", "SAMSUNGEMUSDT",
 }
 
 INDICATORS = [

@@ -2,12 +2,12 @@ name: Sanal masa
 
 on:
   schedule:
-    - cron: "3-59/5 * * * *"
+    - cron: "*/10 * * * *"
   workflow_dispatch:
 
 concurrency:
   group: grok-paper
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -15,7 +15,7 @@ permissions:
 jobs:
   paper:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,7 +27,7 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python runner.py --watch 240
+        run: python runner.py --watch 480
       - name: Defteri kaydet
         run: |
           git config user.name "paper-desk"
