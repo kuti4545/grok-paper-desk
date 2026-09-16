@@ -51,6 +51,7 @@ def load_book():
     book.setdefault("closed", [])
     book.setdefault("log", [])
     book.setdefault("processed_decision", "")
+    book.setdefault("watch", [])
     return book
 
 
@@ -111,14 +112,51 @@ def movers(tickers):
         px = last_px(row)
         if px <= 0:
             continue
-        rows.append({
-            "symbol": sym,
-            "price": px,
-            "change24h": round(chg24(row), 2),
-        })
+        rows.append({"symbol": sym, "price": px, "change24h": round(chg24(row), 2)})
     up = sorted(rows, key=lambda x: x["change24h"], reverse=True)[:7]
     down = sorted(rows, key=lambda x: x["change24h"])[:7]
     return up, down
+
+
+def pump_watch(gainers):
+    out = []
+    for g in gainers:
+        if g["change24h"] >= 25:
+            out.append({
+                "symbol": g["symbol"],
+                "bias": "SHORT",
+                "why": f"24s +{g['change24h']}% pompa",
+                "trigger": "ilk 15m dagitim / RSI gevsemesi",
+                "price": g["price"],
+            })
+    return out
+
+
+def merge_watch(manual, auto):
+    seen = set()
+    out = []
+    for row in (manual or []) + (auto or []):
+        sym = row.get("symbol")
+        if not sym or sym in seen:
+            continue
+        seen.add(sym)
+        out.append(row)
+    return out[:10]
+
+
+def apply_live(book, decision):
+    if decision.get("commentary"):
+        book["last_thought"] = decision["commentary"]
+        book["last_thought_at"] = decision.get("created_at") or iso()
+    for item in decision.get("comments") or []:
+        sym = str(item.get("symbol") or "").upper()
+        note = item.get("note") or ""
+        for pos in book.get("open") or []:
+            if pos.get("symbol") == sym and note:
+                pos["live_note"] = note
+                pos["live_note_at"] = iso()
+    if decision.get("watch"):
+        book["watch_manual"] = decision["watch"]
 
 
 def pnl_usdt(side, entry, mark, notional):
@@ -180,12 +218,11 @@ def mark_and_stops(book, tickers):
 
 def apply_decision(book, tickers):
     decision = load_json(config.DECISION_PATH, {})
+    apply_live(book, decision)
     did = str(decision.get("id") or "")
     if not did or did == book.get("processed_decision"):
         return []
     notes = []
-    book["last_thought"] = decision.get("commentary") or ""
-    book["last_thought_at"] = decision.get("created_at") or iso()
     for item in decision.get("exits") or []:
         symbol = str(item.get("symbol") or "").upper()
         reason = item.get("reason") or "Grok cikis"
@@ -202,10 +239,8 @@ def apply_decision(book, tickers):
         if symbol in config.SKIP_SYMBOLS or side not in {"LONG", "SHORT"}:
             continue
         if any(p["symbol"] == symbol for p in book.get("open") or []):
-            notes.append(f"{symbol} zaten acik")
             continue
         if len(book.get("open") or []) >= config.MAX_OPEN:
-            notes.append("masa dolu")
             break
         row = tickers.get(symbol)
         if not row:
@@ -219,16 +254,13 @@ def apply_decision(book, tickers):
         else:
             sl = sl or entry * 1.012
             tp = tp or entry * 0.976
-        lev = int(item.get("leverage") or 2)
-        lev = max(1, min(config.ABSURD_LEVERAGE, lev))
+        lev = max(1, min(config.ABSURD_LEVERAGE, int(item.get("leverage") or 2)))
         free = free_margin(book)
         margin = float(item.get("margin") or 0)
         if margin <= 0:
-            risk = float(item.get("risk_pct") or 12)
-            margin = free * max(1.0, min(40.0, risk)) / 100.0
+            margin = free * max(1.0, min(40.0, float(item.get("risk_pct") or 12))) / 100.0
         margin = round(min(margin, free), 2)
         if margin < 5:
-            notes.append(f"{symbol} yetersiz marj")
             continue
         pos = {
             "id": uuid.uuid4().hex[:10],
@@ -246,17 +278,16 @@ def apply_decision(book, tickers):
             "score": item.get("score"),
             "setup": item.get("setup"),
             "thesis": item.get("thesis") or decision.get("commentary") or "",
+            "live_note": item.get("thesis") or "",
             "opened_at": iso(),
             "source": "grok",
             "decision_id": did,
         }
         book["open"].append(pos)
         send_telegram(
-            f"Grok giriyor\n{side} {symbol}  {lev}x\n"
-            f"Marj {margin}  notional {pos['notional']}\n"
-            f"Giris {entry}\nSL {sl}\nTP {tp}\n{pos['thesis'][:240]}"
+            f"Grok giriyor\n{side} {symbol}  {lev}x\nMarj {margin}\nGiris {entry}\nSL {sl}\nTP {tp}\n{pos['thesis'][:240]}"
         )
-        notes.append(f"Grok giris {side} {symbol} {entry} {lev}x {margin}u")
+        notes.append(f"Grok giris {side} {symbol}")
     book["processed_decision"] = did
     return notes
 
@@ -277,7 +308,6 @@ def candidates(scan):
             "tp": s.get("tp1"),
             "setup": s.get("setup"),
             "rsi": s.get("rsi"),
-            "yorum": s.get("yorum"),
         })
     return out[:7]
 
@@ -303,7 +333,7 @@ def summarize(book):
         "losses": len(closed) - len(wins),
         "win_rate": round(len(wins) / len(closed) * 100, 1) if closed else 0,
         "indicators": config.INDICATORS,
-        "mode": "SANAL trader · Grok boyut secer",
+        "mode": "SANAL trader",
     }
 
 
@@ -316,6 +346,7 @@ def tick(full_scan=True):
     up, down = movers(tickers)
     book["gainers"] = up
     book["losers"] = down
+    book["watch"] = merge_watch(book.get("watch_manual"), pump_watch(up))
     if full_scan:
         scan = {}
         try:
