@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""5 dk: fiyat guncelle, Grok kararini deftere yaz, SL/TP uygula, Telegram."""
+"""Tarama 5 dk. Acik islem fiyati 25 sn."""
 
 from __future__ import annotations
 
 import json
+import sys
+import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -264,20 +266,21 @@ def summarize(book: dict) -> dict:
     }
 
 
-def main() -> None:
+def tick(full_scan: bool = True) -> dict:
     book = load_book()
     tickers = fetch_tickers()
     notes = []
     notes += apply_decision(book, tickers)
     notes += mark_and_stops(book, tickers)
-    scan = {}
-    try:
-        scan = fetch_scanner()
-    except Exception as exc:
-        notes.append(f"tarayici: {exc}")
-    book["candidates"] = candidates(scan)
-    book["scan_at"] = scan.get("updated_at")
-    book["scanned"] = scan.get("scanned")
+    if full_scan:
+        scan = {}
+        try:
+            scan = fetch_scanner()
+        except Exception as exc:
+            notes.append(f"tarayici: {exc}")
+        book["candidates"] = candidates(scan)
+        book["scan_at"] = scan.get("updated_at")
+        book["scanned"] = scan.get("scanned")
     book["stats"] = summarize(book)
     if notes:
         book["log"].append({"ts": iso(), "events": notes})
@@ -286,6 +289,20 @@ def main() -> None:
     print(json.dumps(book["stats"], ensure_ascii=False))
     for n in notes:
         print(n)
+    return book
+
+
+def main() -> None:
+    watch = 0
+    if len(sys.argv) >= 3 and sys.argv[1] == "--watch":
+        watch = int(sys.argv[2])
+    tick(full_scan=True)
+    if watch <= 0:
+        return
+    deadline = time.time() + watch
+    while time.time() < deadline:
+        time.sleep(25)
+        tick(full_scan=False)
 
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python runner.py
+        run: python runner.py --watch 240
       - name: Defteri kaydet
         run: |
           git config user.name "paper-desk"
