@@ -1,19 +1,17 @@
 {
-  "id": "2026-09-16-1536-near",
-  "created_at": "2026-09-16T15:36:00+03:00",
-  "commentary": "Bu işleme giriyorum: NEARUSDT SHORT. Denemelik tek işlem. RSI 70 civarı tepe, 24s şişkin değil (+3%), BTC zayıf. BR (+100%) ve SYN (+146%) kovalanmıyor.",
-  "entries": [
+  "id": "2026-09-16-1552-note",
+  "created_at": "2026-09-16T15:52:00+03:00",
+  "commentary": "NEAR short duruyor, küçük artıda. Pompayı kör kovalamıyorum ama BR/SYN izleme listesinde: ilk 15m kırmızı + hacim düşüşü gelirse short yazarım. Haber yokken +100% devam da edebilir.",
+  "entries": [],
+  "exits": [],
+  "comments": [
     {
       "symbol": "NEARUSDT",
-      "side": "SHORT",
-      "sl": 2.4971,
-      "tp": 2.4063,
-      "leverage": 2,
-      "score": 5.6,
-      "setup": "TEPE",
-      "thesis": "Deneme: tepe short, sıkı SL. 2.497 üstü iptal, 2.406 hedef."
+      "note": "Fiyat SL'ye uzak, TP'ye yaklaşmadı. BTC zayıf kaldıkça tutuyorum. 2.497 görürse tez biter."
     }
   ],
-  "exits": [],
-  "holds": ["BRUSDT", "SYNUSDT"]
+  "watch": [
+    {"symbol": "BRUSDT", "bias": "SHORT", "why": "+100% pompa", "trigger": "15m kırmızı + RSI 80 altı"},
+    {"symbol": "SYNUSDT", "bias": "SHORT", "why": "+146% pompa", "trigger": "ilk gerçek geri çekilme, şimdi değil"}
+  ]
 }
