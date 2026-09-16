@@ -1,0 +1,41 @@
+name: Sanal masa
+
+on:
+  schedule:
+    - cron: "3-59/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: grok-paper
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  paper:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Calistir
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python runner.py
+      - name: Defteri kaydet
+        run: |
+          git config user.name "paper-desk"
+          git config user.email "paper-desk@users.noreply.github.com"
+          git add docs/book.json docs/grok_decision.json
+          if git diff --cached --quiet; then
+            echo "degisiklik yok"
+          else
+            git commit -m "paper $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git push
+          fi
