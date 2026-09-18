@@ -55,18 +55,28 @@
   "processed_decision": "2026-09-16-1552-note",
   "candidates": [
     {
-      "symbol": "DELLUSDT",
+      "symbol": "CROSSUSDT",
       "side": "LONG",
-      "score": 5.1,
-      "price": 578.66,
-      "sl": 576.831,
-      "tp": 581.404,
+      "score": 7.0,
+      "price": 0.13263,
+      "sl": 0.127196,
+      "tp": 0.140781,
       "setup": "DIP",
-      "rsi": 30.0
+      "rsi": 28.2
+    },
+    {
+      "symbol": "BRUSDT",
+      "side": "SHORT",
+      "score": 5.6,
+      "price": 0.917,
+      "sl": 0.954745,
+      "tp": 0.860382,
+      "setup": "TEPE",
+      "rsi": 69.5
     }
   ],
   "stats": {
-    "updated_at": "2026-09-18T21:07:43+03:00",
+    "updated_at": "2026-09-18T21:28:03+03:00",
     "start_equity": 300.0,
     "equity": 299.34,
     "realized": -0.66,
@@ -90,7 +100,7 @@
   },
   "last_thought": "NEAR short duruyor, küçük artıda. Pompayı kör kovalamıyorum ama BR/SYN izleme listesinde: ilk 15m kırmızı + hacim düşüşü gelirse short yazarım. Haber yokken +100% devam da edebilir.",
   "last_thought_at": "2026-09-16T15:52:00+03:00",
-  "scan_at": "2026-09-18 20:56:51 TR",
+  "scan_at": "2026-09-18 21:07:43 TR",
   "scanned": 150,
   "watch": [
     {
@@ -108,44 +118,44 @@
     {
       "symbol": "GUSDT",
       "bias": "SHORT",
-      "why": "24s +86.16% pompa",
+      "why": "24s +79.32% pompa",
       "trigger": "ilk 15m dagitim / RSI gevsemesi / ask duvari",
-      "price": 0.008366
+      "price": 0.00808
     },
     {
       "symbol": "AKEUSDT",
       "bias": "SHORT",
-      "why": "24s +71.18% pompa",
+      "why": "24s +67.29% pompa",
       "trigger": "ilk 15m dagitim / RSI gevsemesi / ask duvari",
-      "price": 0.0358405
+      "price": 0.0352
     },
     {
       "symbol": "FUSDT",
       "bias": "SHORT",
-      "why": "24s +44.06% pompa",
+      "why": "24s +42.5% pompa",
       "trigger": "ilk 15m dagitim / RSI gevsemesi / ask duvari",
-      "price": 0.00461
+      "price": 0.00456
     },
     {
       "symbol": "PIEVERSEUSDT",
       "bias": "SHORT",
-      "why": "24s +37.27% pompa",
+      "why": "24s +38.84% pompa",
       "trigger": "ilk 15m dagitim / RSI gevsemesi / ask duvari",
-      "price": 1.58106
+      "price": 1.59921
     },
     {
       "symbol": "STRKUSDT",
       "bias": "SHORT",
-      "why": "24s +32.92% pompa",
+      "why": "24s +34.72% pompa",
       "trigger": "ilk 15m dagitim / RSI gevsemesi / ask duvari",
-      "price": 0.037948
+      "price": 0.038411
     },
     {
-      "symbol": "EVAAUSDT",
+      "symbol": "MYXUSDT",
       "bias": "SHORT",
-      "why": "24s +30.02% pompa",
+      "why": "24s +32.37% pompa",
       "trigger": "ilk 15m dagitim / RSI gevsemesi / ask duvari",
-      "price": 0.5869
+      "price": 0.08089
     }
   ],
   "watch_manual": [
@@ -165,264 +175,264 @@
   "gainers": [
     {
       "symbol": "GUSDT",
-      "price": 0.008366,
-      "change24h": 86.16,
-      "vol24_usdt": 65571987.0,
-      "funding_pct": -0.0173
+      "price": 0.00808,
+      "change24h": 79.32,
+      "vol24_usdt": 66406863.0,
+      "funding_pct": -0.0133
     },
     {
       "symbol": "AKEUSDT",
-      "price": 0.0358405,
-      "change24h": 71.18,
-      "vol24_usdt": 13355868.0,
+      "price": 0.0352,
+      "change24h": 67.29,
+      "vol24_usdt": 17807772.0,
       "funding_pct": 0.0263
     },
     {
       "symbol": "FUSDT",
-      "price": 0.00461,
-      "change24h": 44.06,
-      "vol24_usdt": 6278156.0,
-      "funding_pct": -0.2853
+      "price": 0.00456,
+      "change24h": 42.5,
+      "vol24_usdt": 6531461.0,
+      "funding_pct": -0.2388
     },
     {
       "symbol": "PIEVERSEUSDT",
-      "price": 1.58106,
-      "change24h": 37.27,
-      "vol24_usdt": 5192651.0,
-      "funding_pct": 0.022
+      "price": 1.59921,
+      "change24h": 38.84,
+      "vol24_usdt": 5300367.0,
+      "funding_pct": 0.0258
     },
     {
       "symbol": "BRUSDT",
-      "price": 0.93474,
-      "change24h": 35.55,
-      "vol24_usdt": 23104082.0,
+      "price": 0.92343,
+      "change24h": 36.54,
+      "vol24_usdt": 23329939.0,
       "funding_pct": 0.005
     },
     {
       "symbol": "STRKUSDT",
-      "price": 0.037948,
-      "change24h": 32.92,
-      "vol24_usdt": 4740740.0,
+      "price": 0.038411,
+      "change24h": 34.72,
+      "vol24_usdt": 4869446.0,
       "funding_pct": 0.005
     },
     {
-      "symbol": "EVAAUSDT",
-      "price": 0.5869,
-      "change24h": 30.02,
-      "vol24_usdt": 4068966.0,
+      "symbol": "MYXUSDT",
+      "price": 0.08089,
+      "change24h": 32.37,
+      "vol24_usdt": 10458336.0,
       "funding_pct": 0.005
     }
   ],
   "losers": [
     {
       "symbol": "CROSSUSDT",
-      "price": 0.13388,
-      "change24h": -27.39,
-      "vol24_usdt": 5309097.0,
+      "price": 0.13338,
+      "change24h": -23.82,
+      "vol24_usdt": 5047250.0,
       "funding_pct": 0.005
     },
     {
       "symbol": "AVAUSDT",
-      "price": 0.234,
-      "change24h": -18.38,
-      "vol24_usdt": 11124987.0,
-      "funding_pct": -0.3093
+      "price": 0.2312,
+      "change24h": -18.62,
+      "vol24_usdt": 11036330.0,
+      "funding_pct": -0.2844
     },
     {
-      "symbol": "STGUSDT",
-      "price": 0.1367,
-      "change24h": -8.44,
-      "vol24_usdt": 7987598.0,
+      "symbol": "MARSCOINUSDT",
+      "price": 0.11004,
+      "change24h": -10.95,
+      "vol24_usdt": 10710434.0,
       "funding_pct": 0.005
     },
     {
       "symbol": "龙虾USDT",
-      "price": 0.22099,
-      "change24h": -8.33,
-      "vol24_usdt": 10388039.0,
-      "funding_pct": 0.0069
-    },
-    {
-      "symbol": "MARSCOINUSDT",
-      "price": 0.11022,
-      "change24h": -7.57,
-      "vol24_usdt": 11098975.0,
+      "price": 0.220038,
+      "change24h": -8.35,
+      "vol24_usdt": 10406541.0,
       "funding_pct": 0.005
     },
     {
-      "symbol": "SYNUSDT",
-      "price": 0.17359,
-      "change24h": -7.38,
-      "vol24_usdt": 4172255.0,
+      "symbol": "STGUSDT",
+      "price": 0.1367,
+      "change24h": -8.32,
+      "vol24_usdt": 7988640.0,
       "funding_pct": 0.005
+    },
+    {
+      "symbol": "AINUSDT",
+      "price": 0.02093,
+      "change24h": -7.22,
+      "vol24_usdt": 1504339.0,
+      "funding_pct": -0.2406
     },
     {
       "symbol": "GENIUSUSDT",
-      "price": 0.33709,
-      "change24h": -6.56,
-      "vol24_usdt": 8887412.0,
+      "price": 0.33529,
+      "change24h": -6.83,
+      "vol24_usdt": 8845967.0,
       "funding_pct": 0.005
     }
   ],
   "tape": {
-    "FUSDT": {
-      "symbol": "FUSDT",
-      "price": 0.004631,
-      "change24h": 44.72,
-      "funding_pct": -0.3028,
-      "oi": 130296010.0,
-      "vol24_usdt": 6148741.0,
-      "range_loc": 62.9,
-      "high24": 0.005483,
-      "low24": 0.003187,
-      "book_imb": -19.1,
-      "ask_wall": {
-        "price": 0.004649,
-        "size": 786945.0
-      },
-      "bid_wall": {
-        "price": 0.004623,
-        "size": 363641.0
-      }
-    },
-    "AKEUSDT": {
-      "symbol": "AKEUSDT",
-      "price": 0.0344507,
-      "change24h": 63.87,
-      "funding_pct": 0.0271,
-      "oi": 71573698.0,
-      "vol24_usdt": 12755716.0,
-      "range_loc": 98.4,
-      "high24": 0.0346682,
-      "low24": 0.0207194,
-      "book_imb": -67.2,
-      "ask_wall": {
-        "price": 0.0344922,
-        "size": 33781.0
-      },
-      "bid_wall": {
-        "price": 0.03438,
-        "size": 96998.0
-      }
-    },
-    "SYNUSDT": {
-      "symbol": "SYNUSDT",
-      "price": 0.17654,
-      "change24h": -4.68,
-      "funding_pct": 0.005,
-      "oi": 6681577.0,
-      "vol24_usdt": 4204228.0,
-      "range_loc": 37.1,
-      "high24": 0.19582,
-      "low24": 0.16515,
-      "book_imb": 55.0,
-      "ask_wall": {
-        "price": 0.17664,
-        "size": 7129.0
-      },
-      "bid_wall": {
-        "price": 0.17593,
-        "size": 944.0
-      }
-    },
     "PIEVERSEUSDT": {
       "symbol": "PIEVERSEUSDT",
-      "price": 1.57415,
-      "change24h": 36.97,
-      "funding_pct": 0.0211,
-      "oi": 2271948.0,
-      "vol24_usdt": 5157231.0,
-      "range_loc": 65.2,
+      "price": 1.60452,
+      "change24h": 39.3,
+      "funding_pct": 0.0244,
+      "oi": 2280847.0,
+      "vol24_usdt": 5263369.0,
+      "range_loc": 69.8,
       "high24": 1.80045,
-      "low24": 1.14923,
-      "book_imb": 37.4,
+      "low24": 1.15123,
+      "book_imb": -31.6,
       "ask_wall": {
-        "price": 1.57373,
-        "size": 310.0
+        "price": 1.60835,
+        "size": 1501.0
       },
       "bid_wall": {
-        "price": 1.57121,
+        "price": 1.60237,
         "size": 310.0
       }
     },
-    "STRKUSDT": {
-      "symbol": "STRKUSDT",
-      "price": 0.038642,
-      "change24h": 35.2,
-      "funding_pct": 0.005,
-      "oi": 65791946.4,
-      "vol24_usdt": 4718528.0,
-      "range_loc": 98.0,
-      "high24": 0.03886,
-      "low24": 0.027974,
-      "book_imb": -17.3,
+    "FUSDT": {
+      "symbol": "FUSDT",
+      "price": 0.004568,
+      "change24h": 42.75,
+      "funding_pct": -0.2589,
+      "oi": 125693302.0,
+      "vol24_usdt": 6478461.0,
+      "range_loc": 60.1,
+      "high24": 0.005483,
+      "low24": 0.003187,
+      "book_imb": 72.2,
       "ask_wall": {
-        "price": 0.038694,
-        "size": 41355.8
+        "price": 0.004578,
+        "size": 968195.0
       },
       "bid_wall": {
-        "price": 0.038591,
-        "size": 7720.8
-      }
-    },
-    "EVAAUSDT": {
-      "symbol": "EVAAUSDT",
-      "price": 0.594,
-      "change24h": 31.71,
-      "funding_pct": 0.005,
-      "oi": 2570969.0,
-      "vol24_usdt": 4047544.0,
-      "range_loc": 49.9,
-      "high24": 0.7392,
-      "low24": 0.4492,
-      "book_imb": 23.7,
-      "ask_wall": {
-        "price": 0.5962,
-        "size": 2305.0
-      },
-      "bid_wall": {
-        "price": 0.5924,
-        "size": 4198.0
+        "price": 0.004564,
+        "size": 389477.0
       }
     },
     "GUSDT": {
       "symbol": "GUSDT",
-      "price": 0.008306,
-      "change24h": 86.19,
-      "funding_pct": -0.0195,
-      "oi": 368816655.0,
-      "vol24_usdt": 65305878.0,
-      "range_loc": 67.6,
+      "price": 0.008184,
+      "change24h": 81.87,
+      "funding_pct": -0.014,
+      "oi": 375502785.0,
+      "vol24_usdt": 65982748.0,
+      "range_loc": 65.4,
       "high24": 0.010149,
-      "low24": 0.004461,
-      "book_imb": 67.5,
+      "low24": 0.004476,
+      "book_imb": -4.0,
       "ask_wall": {
-        "price": 0.00832,
-        "size": 1095750.0
+        "price": 0.008187,
+        "size": 297370.0
       },
       "bid_wall": {
-        "price": 0.00831,
-        "size": 247540.0
+        "price": 0.008161,
+        "size": 268410.0
+      }
+    },
+    "AKEUSDT": {
+      "symbol": "AKEUSDT",
+      "price": 0.0365059,
+      "change24h": 74.51,
+      "funding_pct": 0.0272,
+      "oi": 73651952.0,
+      "vol24_usdt": 14292750.0,
+      "range_loc": 96.9,
+      "high24": 0.0370034,
+      "low24": 0.0207194,
+      "book_imb": -43.5,
+      "ask_wall": {
+        "price": 0.036382,
+        "size": 33026.0
+      },
+      "bid_wall": {
+        "price": 0.0362478,
+        "size": 40582.0
+      }
+    },
+    "SYNUSDT": {
+      "symbol": "SYNUSDT",
+      "price": 0.17463,
+      "change24h": -7.1,
+      "funding_pct": 0.005,
+      "oi": 6693333.0,
+      "vol24_usdt": 4169462.0,
+      "range_loc": 30.9,
+      "high24": 0.19582,
+      "low24": 0.16515,
+      "book_imb": 1.2,
+      "ask_wall": {
+        "price": 0.17525,
+        "size": 6407.0
+      },
+      "bid_wall": {
+        "price": 0.17464,
+        "size": 1251.0
+      }
+    },
+    "STRKUSDT": {
+      "symbol": "STRKUSDT",
+      "price": 0.038568,
+      "change24h": 35.05,
+      "funding_pct": 0.005,
+      "oi": 67103258.800000004,
+      "vol24_usdt": 4790833.0,
+      "range_loc": 96.8,
+      "high24": 0.038923,
+      "low24": 0.027974,
+      "book_imb": 40.5,
+      "ask_wall": {
+        "price": 0.038713,
+        "size": 7720.8
+      },
+      "bid_wall": {
+        "price": 0.038594,
+        "size": 9564.3
+      }
+    },
+    "MYXUSDT": {
+      "symbol": "MYXUSDT",
+      "price": 0.07915,
+      "change24h": 29.58,
+      "funding_pct": 0.005,
+      "oi": 30939571.0,
+      "vol24_usdt": 10387938.0,
+      "range_loc": 35.5,
+      "high24": 0.11487,
+      "low24": 0.05949,
+      "book_imb": 76.3,
+      "ask_wall": {
+        "price": 0.07934,
+        "size": 10476.0
+      },
+      "bid_wall": {
+        "price": 0.07907,
+        "size": 16361.0
       }
     },
     "BRUSDT": {
       "symbol": "BRUSDT",
-      "price": 0.91336,
-      "change24h": 34.23,
+      "price": 0.93066,
+      "change24h": 36.39,
       "funding_pct": 0.005,
-      "oi": 8944589.0,
-      "vol24_usdt": 23308807.0,
-      "range_loc": 90.2,
+      "oi": 8940867.0,
+      "vol24_usdt": 23326987.0,
+      "range_loc": 95.4,
       "high24": 0.946,
       "low24": 0.61228,
-      "book_imb": -5.4,
+      "book_imb": 0.0,
       "ask_wall": {
-        "price": 0.91422,
-        "size": 578.0
+        "price": 0.93195,
+        "size": 214.0
       },
       "bid_wall": {
-        "price": 0.9129,
-        "size": 110.0
+        "price": 0.93039,
+        "size": 1048.0
       }
     }
   }
